@@ -1,0 +1,233 @@
+{
+  "pack_id": "legal",
+  "pack_version": 1,
+  "templates": [
+    {
+      "template_id": "legal_realistic_corporate_v1",
+      "name": "Legal • Realistic Corporate (Recommended)",
+      "description": "Photoreal / corporate documentary look. Best default for legal quests: readable faces, believable offices/courtrooms, neutral palette.",
+      "base_prompt": "professional corporate photography, realistic, clean composition, neutral color palette, modern law office, courtroom atmosphere, natural skin texture, soft light, sharp focus, no fantasy",
+      "negative_prompt": "anime, cartoon, illustration, fantasy, sci-fi, medieval, low quality, blurry, noisy, watermark, logo, text, letters, signature, extra fingers, extra limbs, deformed hands, bad anatomy, duplicate face, multiple people, crowd",
+      "model_checkpoint": null,
+      "lora_refs": [
+        {
+          "name": "film_grain",
+          "weight": 0.25,
+          "optional": true
+        },
+        {
+          "name": "detail_tweaker",
+          "weight": 0.35,
+          "optional": true
+        }
+      ],
+      "resolution": {
+        "width": 1024,
+        "height": 768
+      },
+      "sampler": "dpmpp_2m",
+      "steps": 34,
+      "cfg_scale": 6.0,
+      "seed_policy": "random",
+      "style_metadata": {
+        "pack": "legal",
+        "template_id": "legal_realistic_corporate_v1",
+        "recommended": true,
+        "identity_notes": "Use character reference images (portrait/full_front) for consistent identity across variants. If your ComfyUI has IP-Adapter, set ip_adapter_enabled in pipeline profiles for stronger identity lock.",
+        "tags": [
+          "legal",
+          "realistic",
+          "corporate"
+        ],
+        "recommended_pipeline_profiles": {
+          "scene": {
+            "profile_id": "scene_custom_flux",
+            "version": 1
+          },
+          "character_ref": {
+            "profile_id": "character_custom_flux",
+            "version": 1
+          },
+          "world_preview": {
+            "profile_id": "world_custom_flux",
+            "version": 1
+          }
+        },
+        "consistency": {
+          "method": "ip_adapter_controlnet",
+          "use_ip_adapter_face": true,
+          "use_ip_adapter_body": true,
+          "face_weight": 0.85,
+          "body_weight": 0.65
+        }
+      }
+    },
+    {
+      "template_id": "legal_illustration_editorial_v1",
+      "name": "Legal • Clean Editorial Illustration",
+      "description": "Clean editorial illustration (friendly UI). Use for lighter tone quests and diagrams.",
+      "base_prompt": "clean editorial illustration, crisp lines, simple shading, minimal clutter, readable silhouettes, professional, legal theme, courtroom, law office",
+      "negative_prompt": "photorealistic, heavy grain, messy lines, sketchy, noisy, watermark, logo, text, letters, extra fingers, deformed hands, bad anatomy",
+      "model_checkpoint": null,
+      "lora_refs": [
+        {
+          "name": "lineart",
+          "weight": 0.65,
+          "optional": true
+        },
+        {
+          "name": "flat_color",
+          "weight": 0.55,
+          "optional": true
+        }
+      ],
+      "resolution": {
+        "width": 1024,
+        "height": 768
+      },
+      "sampler": "dpmpp_2m",
+      "steps": 32,
+      "cfg_scale": 6.5,
+      "seed_policy": "random",
+      "style_metadata": {
+        "pack": "legal",
+        "template_id": "legal_illustration_editorial_v1",
+        "recommended": false,
+        "tags": [
+          "legal",
+          "illustration",
+          "editorial"
+        ],
+        "recommended_pipeline_profiles": {
+          "scene": {
+            "profile_id": "scene_custom_flux",
+            "version": 1
+          },
+          "character_ref": {
+            "profile_id": "character_custom_flux",
+            "version": 1
+          },
+          "world_preview": {
+            "profile_id": "world_custom_flux",
+            "version": 1
+          }
+        },
+        "consistency": {
+          "method": "ip_adapter_controlnet",
+          "use_ip_adapter_face": true,
+          "use_ip_adapter_body": true,
+          "face_weight": 0.85,
+          "body_weight": 0.65
+        }
+      }
+    },
+    {
+      "template_id": "legal_noir_investigation_v1",
+      "name": "Legal • Noir Investigation",
+      "description": "Cinematic noir (moody). Useful for detective/legal drama quests.",
+      "base_prompt": "cinematic noir, high contrast, moody shadows, dramatic rim light, film still, legal drama, investigation board, night city rain, believable faces",
+      "negative_prompt": "bright cheerful, pastel, cartoon, anime, fantasy, sci-fi, watermark, logo, text, letters, extra fingers, deformed hands, bad anatomy, duplicate face",
+      "model_checkpoint": null,
+      "lora_refs": [
+        {
+          "name": "noir_lighting",
+          "weight": 0.55,
+          "optional": true
+        }
+      ],
+      "resolution": {
+        "width": 1024,
+        "height": 768
+      },
+      "sampler": "dpmpp_2m",
+      "steps": 38,
+      "cfg_scale": 6.1,
+      "seed_policy": "random",
+      "style_metadata": {
+        "pack": "legal",
+        "template_id": "legal_noir_investigation_v1",
+        "recommended": false,
+        "tags": [
+          "legal",
+          "noir",
+          "cinematic"
+        ],
+        "recommended_pipeline_profiles": {
+          "scene": {
+            "profile_id": "scene_custom_flux",
+            "version": 1
+          },
+          "character_ref": {
+            "profile_id": "character_custom_flux",
+            "version": 1
+          },
+          "world_preview": {
+            "profile_id": "world_custom_flux",
+            "version": 1
+          }
+        },
+        "consistency": {
+          "method": "ip_adapter_controlnet",
+          "use_ip_adapter_face": true,
+          "use_ip_adapter_body": true,
+          "face_weight": 0.85,
+          "body_weight": 0.65
+        }
+      }
+    },
+    {
+      "template_id": "legal_document_scans_v1",
+      "name": "Legal • Document / Evidence (Clean)",
+      "description": "For artifacts like documents/evidence photos. Clean, readable, minimal distractions.",
+      "base_prompt": "clean documentation photo, white background, top-down, neatly arranged, evidence photo style, realistic paper texture, sharp readable shapes",
+      "negative_prompt": "handwriting, text, letters, watermark, logo, messy background, clutter, low quality, blurry, noisy",
+      "model_checkpoint": null,
+      "lora_refs": [
+        {
+          "name": "product_photo",
+          "weight": 0.45,
+          "optional": true
+        }
+      ],
+      "resolution": {
+        "width": 1024,
+        "height": 768
+      },
+      "sampler": "dpmpp_2m",
+      "steps": 32,
+      "cfg_scale": 5.8,
+      "seed_policy": "random",
+      "style_metadata": {
+        "pack": "legal",
+        "template_id": "legal_document_scans_v1",
+        "recommended": false,
+        "tags": [
+          "legal",
+          "artifact",
+          "document"
+        ],
+        "recommended_pipeline_profiles": {
+          "scene": {
+            "profile_id": "scene_custom_flux",
+            "version": 1
+          },
+          "character_ref": {
+            "profile_id": "character_custom_flux",
+            "version": 1
+          },
+          "world_preview": {
+            "profile_id": "world_custom_flux",
+            "version": 1
+          }
+        },
+        "consistency": {
+          "method": "ip_adapter_controlnet",
+          "use_ip_adapter_face": true,
+          "use_ip_adapter_body": true,
+          "face_weight": 0.85,
+          "body_weight": 0.65
+        }
+      }
+    }
+  ]
+}

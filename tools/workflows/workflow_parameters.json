@@ -1,0 +1,62 @@
+{
+  "workflow_parameters": {
+    "step1_portrait": {
+      "model": "qwen-rapid-nsfw-v9.0-Q4_K_M.gguf",
+      "clip": "Qwen2.5-VL-7B-Instruct-abliterated.Q8_0.gguf",
+      "clip_type": "qwen_image",
+      "vae": "qwen-image\\qwen_image_vae.safetensors",
+      "lora": "ultra_realistic_hyperdetailed_qwen.safetensors",
+      "lora_strength_model": 1.0,
+      "lora_strength_clip": 0.4,
+      "width": 768,
+      "height": 1024,
+      "steps": 9,
+      "cfg": 1.0,
+      "sampler": "euler",
+      "scheduler": "beta",
+      "denoise": 1.0,
+      "default_prompt": "High-quality character portrait, detailed face, professional lighting, clean background, masterpiece, best quality",
+      "default_negative": "low quality, blurry, distorted, deformed, ugly, bad anatomy, worst quality, multiple people, crowd"
+    },
+    "step2_multiview": {
+      "model": "qwen-rapid-nsfw-v9.0-Q4_K_M.gguf",
+      "clip": "Qwen2.5-VL-7B-Instruct-abliterated.Q8_0.gguf",
+      "clip_type": "qwen_image",
+      "vae": "qwen-image\\qwen_image_vae.safetensors",
+      "lora": "ultra_realistic_hyperdetailed_qwen.safetensors",
+      "lora_strength_model": 1.0,
+      "lora_strength_clip": 0.4,
+      "width": 768,
+      "height": 1024,
+      "steps": 9,
+      "cfg": 1.0,
+      "sampler": "euler",
+      "scheduler": "beta",
+      "denoise": 0.78,
+      "prompts": {
+        "front_view": "Full-body front view of the character, standing pose, looking at camera, hands at sides, neutral expression, clean white background, professional character design, consistent lighting, make sure the entire body is visible. Keep the character's appearance perfectly consistent.",
+        "back_view": "Full-body back view of the character, standing pose, rear perspective, hands at sides, clean white background, professional character design, consistent lighting, make sure the entire body is visible. Keep the character's appearance perfectly consistent.",
+        "side_view": "Full-body side view of the character, standing pose, profile perspective, hands at sides, clean white background, professional character design, consistent lighting, make sure the entire body is visible. Keep the character's appearance perfectly consistent."
+      },
+      "default_negative": "low quality, blurry, distorted, deformed, ugly, bad anatomy, worst quality, multiple people, crowd, extra limbs"
+    },
+    "step3_scene": {
+      "model": "qwen-rapid-nsfw-v9.0-Q4_K_M.gguf",
+      "clip": "Qwen2.5-VL-7B-Instruct-abliterated.Q8_0.gguf",
+      "clip_type": "qwen_image",
+      "vae": "qwen-image\\qwen_image_vae.safetensors",
+      "lora": "ultra_realistic_hyperdetailed_qwen.safetensors",
+      "lora_strength_model": 1.0,
+      "lora_strength_clip": 0.4,
+      "width": 1024,
+      "height": 768,
+      "steps": 9,
+      "cfg": 1.0,
+      "sampler": "euler",
+      "scheduler": "beta",
+      "denoise": 0.65,
+      "default_prompt": "Use this character reference. Create a cinematic scene with detailed environment and lighting. Keep the same character identity, face, hairstyle, outfit details and proportions. Add environment, lighting and mood, but do not change the character.",
+      "default_negative": "low quality, blurry, distorted, deformed, ugly, bad anatomy, worst quality, character changes, different person, face changes"
+    }
+  }
+}

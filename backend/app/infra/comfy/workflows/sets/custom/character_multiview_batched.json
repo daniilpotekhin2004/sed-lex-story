@@ -1,0 +1,324 @@
+{
+  "1": {
+    "class_type": "UnetLoaderGGUF",
+    "inputs": {
+      "unet_name": "flux1-kontext-dev-Q4_K_M.gguf"
+    }
+  },
+  "2": {
+    "class_type": "DualCLIPLoader",
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp16.safetensors",
+      "type": "flux"
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "front view, facing camera, full body portrait, standing pose, neutral expression",
+      "clip": ["2", 0]
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "side profile view, 90 degree angle, full body, standing pose, clean profile silhouette",
+      "clip": ["2", 0]
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "three-quarter view, 45 degree angle, full body, dynamic pose, detailed features",
+      "clip": ["2", 0]
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "back view, rear angle, full body, standing pose, showing back details",
+      "clip": ["2", 0]
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "close-up portrait, head and shoulders, detailed facial features, high detail",
+      "clip": ["2", 0]
+    }
+  },
+  "8": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "blurry, low quality, inconsistent, multiple people, deformed, side view, back view, profile, turned away",
+      "clip": ["2", 0]
+    }
+  },
+  "9": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["3", 0],
+      "guidance": 3.8
+    }
+  },
+  "10": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["4", 0],
+      "guidance": 3.6
+    }
+  },
+  "11": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["5", 0],
+      "guidance": 4.0
+    }
+  },
+  "12": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["6", 0],
+      "guidance": 3.5
+    }
+  },
+  "13": {
+    "class_type": "FluxGuidance",
+    "inputs": {
+      "conditioning": ["7", 0],
+      "guidance": 4.2
+    }
+  },
+  "14": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": ["1", 0],
+      "conditioning": ["9", 0]
+    }
+  },
+  "15": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": ["1", 0],
+      "conditioning": ["10", 0]
+    }
+  },
+  "16": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": ["1", 0],
+      "conditioning": ["11", 0]
+    }
+  },
+  "17": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": ["1", 0],
+      "conditioning": ["12", 0]
+    }
+  },
+  "18": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": ["1", 0],
+      "conditioning": ["13", 0]
+    }
+  },
+  "19": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": ""
+    }
+  },
+  "20": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "FLUX1\\ae.safetensors"
+    }
+  },
+  "21": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": ["19", 0],
+      "vae": ["20", 0]
+    }
+  },
+  "22": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 0
+    }
+  },
+  "23": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "euler"
+    }
+  },
+  "24": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": ["1", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 0.75
+    }
+  },
+  "25": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": ["1", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 0.7
+    }
+  },
+  "26": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": ["1", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 0.8
+    }
+  },
+  "27": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": ["1", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 0.7
+    }
+  },
+  "28": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": ["1", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 0.85
+    }
+  },
+  "29": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": ["22", 0],
+      "guider": ["14", 0],
+      "sampler": ["23", 0],
+      "sigmas": ["24", 0],
+      "latent_image": ["21", 0]
+    }
+  },
+  "30": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": ["22", 0],
+      "guider": ["15", 0],
+      "sampler": ["23", 0],
+      "sigmas": ["25", 0],
+      "latent_image": ["21", 0]
+    }
+  },
+  "31": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": ["22", 0],
+      "guider": ["16", 0],
+      "sampler": ["23", 0],
+      "sigmas": ["26", 0],
+      "latent_image": ["21", 0]
+    }
+  },
+  "32": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": ["22", 0],
+      "guider": ["17", 0],
+      "sampler": ["23", 0],
+      "sigmas": ["27", 0],
+      "latent_image": ["21", 0]
+    }
+  },
+  "33": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": ["22", 0],
+      "guider": ["18", 0],
+      "sampler": ["23", 0],
+      "sigmas": ["28", 0],
+      "latent_image": ["21", 0]
+    }
+  },
+  "34": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["29", 0],
+      "vae": ["20", 0]
+    }
+  },
+  "35": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["30", 0],
+      "vae": ["20", 0]
+    }
+  },
+  "36": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["31", 0],
+      "vae": ["20", 0]
+    }
+  },
+  "37": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["32", 0],
+      "vae": ["20", 0]
+    }
+  },
+  "38": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["33", 0],
+      "vae": ["20", 0]
+    }
+  },
+  "39": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "lwq/multiview_front",
+      "images": ["34", 0]
+    }
+  },
+  "40": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "lwq/multiview_side",
+      "images": ["35", 0]
+    }
+  },
+  "41": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "lwq/multiview_three_quarter",
+      "images": ["36", 0]
+    }
+  },
+  "42": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "lwq/multiview_back",
+      "images": ["37", 0]
+    }
+  },
+  "43": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "lwq/multiview_closeup",
+      "images": ["38", 0]
+    }
+  }
+}

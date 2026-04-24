@@ -1,9 +1,0 @@
-front view
-three-quarter view
-back view
-rear view
-frontal perspective
-side three-quarter angle
-character facing camera
-slightly angled view
-profile view

@@ -1,0 +1,1363 @@
+import { useMemo, useState } from "react";
+import { generateDescription } from "../api/ai";
+import type { AIFieldSpec } from "../api/ai";
+import type { CharacterPreset, Location } from "../shared/types";
+import AIFillModal from "./AIFillModal";
+import { VOICE_PROFILE_FIELD_DESCRIPTION, VOICE_PROFILE_PLACEHOLDER } from "../shared/voiceProfile";
+import "./AssetWizardModal.css";
+
+type WizardType = "character" | "location";
+
+interface AssetWizardModalProps {
+  type: WizardType;
+  onClose: () => void;
+  onCreate: (result: WizardResult) => Promise<void>;
+}
+
+export type CharacterWizardResult = {
+  type: "character";
+  payload: Partial<CharacterPreset>;
+  generateSketch: boolean;
+  generateSheet: boolean;
+};
+
+export type LocationWizardResult = {
+  type: "location";
+  payload: Partial<Location>;
+  generateSketch: boolean;
+  generateSheet: boolean;
+};
+
+export type WizardResult = CharacterWizardResult | LocationWizardResult;
+
+type CharacterWizardState = {
+  name: string;
+  description: string;
+  character_type: string;
+  role_label: string;
+  age_group: string;
+  build: string;
+  face_traits: string;
+  hair: string;
+  accessories: string;
+  outfit: string;
+  palette: string;
+  distinctive_features: string;
+  demeanor: string;
+  voice_profile: string;
+  motivation: string;
+  legal_status: string;
+  competencies: string;
+  taboo: string;
+  style_tags: string;
+  negative_prompt: string;
+  advanced_prompt_enabled: boolean;
+  advanced_prompt: string;
+  generateSketch: boolean;
+  generateSheet: boolean;
+  is_public: boolean;
+};
+
+type LocationWizardState = {
+  name: string;
+  description: string;
+  location_type: string;
+  interior_exterior: string;
+  era: string;
+  time_of_day: string;
+  style: string;
+  materials: string;
+  mood: string;
+  props: string;
+  tags: string;
+  notes: string;
+  negative_prompt: string;
+  advanced_prompt_enabled: boolean;
+  advanced_prompt: string;
+  generateSketch: boolean;
+  generateSheet: boolean;
+};
+
+type CharacterAppearanceProfile = {
+  role_label?: string;
+  age_group?: string;
+  build?: string;
+  face_traits?: string;
+  hair?: string;
+  accessories?: string[];
+  outfit?: string;
+  palette?: string;
+  distinctive_features?: string;
+  demeanor?: string;
+  taboo?: string;
+};
+
+type LocationVisualProfile = {
+  location_type?: string;
+  interior_exterior?: string;
+  era?: string;
+  time_of_day?: string;
+  style?: string;
+  materials?: string;
+  mood?: string;
+  props?: string[];
+  notes?: string;
+};
+
+const CHARACTER_STEPS = ["Роль", "Визуальная ДНК", "Голос", "Скетч", "Референсы"];
+const LOCATION_STEPS = ["Тип", "Визуальная фиксация", "Скетч", "Референсы"];
+
+const CHARACTER_TEMPLATES = [
+  {
+    label: "Судья",
+    summary: "строгий тон, мантия, символ власти",
+    role_label: "судья",
+    character_type: "supporting",
+    outfit: "судья в мантии",
+    demeanor: "строгий взгляд",
+    voice_profile: "Persona: Male, Middle-aged. Pace: slow. Timbre: deep. Emotion: serious. Scenario: news.",
+    legal_status: "судья",
+  },
+  {
+    label: "Прокурор",
+    summary: "уверенный, аргументы, темный костюм",
+    role_label: "прокурор",
+    character_type: "supporting",
+    outfit: "темный деловой костюм",
+    demeanor: "жесткий взгляд",
+    voice_profile: "Persona: Female, Middle-aged. Pace: moderate. Timbre: clear. Emotion: serious. Scenario: news.",
+    legal_status: "прокурор",
+  },
+  {
+    label: "Адвокат",
+    summary: "спокойный, логика, аккуратный костюм",
+    role_label: "адвокат",
+    character_type: "supporting",
+    outfit: "классический костюм",
+    demeanor: "спокойный, внимательный",
+    voice_profile: "Persona: Male, Middle-aged. Pace: moderate. Timbre: magnetic. Emotion: calm. Scenario: storytelling.",
+    legal_status: "адвокат",
+  },
+  {
+    label: "Следователь",
+    summary: "наблюдательный, рабочая форма",
+    role_label: "следователь",
+    character_type: "supporting",
+    outfit: "служебная форма, блокнот",
+    demeanor: "внимательный взгляд",
+    voice_profile: "Persona: Male, Young. Pace: moderate. Timbre: clear. Emotion: serious. Scenario: classroom.",
+    legal_status: "следователь",
+  },
+  {
+    label: "Свидетель",
+    summary: "обычный человек, нервное напряжение",
+    role_label: "свидетель",
+    character_type: "background",
+    outfit: "повседневная одежда",
+    demeanor: "напряженный, нервный",
+    voice_profile: "Persona: Female, Young. Pace: slow. Timbre: raspy. Emotion: gentle. Scenario: storytelling.",
+    legal_status: "свидетель",
+  },
+  {
+    label: "Секретарь суда",
+    summary: "деловой, аккуратный, бумаги",
+    role_label: "секретарь суда",
+    character_type: "background",
+    outfit: "деловой стиль, аккуратный образ",
+    demeanor: "собранный, внимательный",
+    voice_profile: "Persona: Female, Young. Pace: fast. Timbre: clear. Emotion: calm. Scenario: classroom.",
+    legal_status: "секретарь",
+  },
+];
+
+const LOCATION_TEMPLATES = [
+  {
+    label: "Зал суда",
+    summary: "высокие потолки, дерево, герб",
+    location_type: "зал суда",
+    interior_exterior: "интерьер",
+    mood: "напряженная торжественная атмосфера",
+    props: "трибуна судьи, герб, лавки",
+    tags: "суд, драма",
+  },
+  {
+    label: "Кабинет следователя",
+    summary: "рабочий стол, папки, лампы",
+    location_type: "кабинет следователя",
+    interior_exterior: "интерьер",
+    mood: "рабочая атмосфера",
+    props: "стол, папки с делами, лампа",
+    tags: "полиция, офис",
+  },
+  {
+    label: "Офис адвоката",
+    summary: "уютный офис, книги, документы",
+    location_type: "офис адвоката",
+    interior_exterior: "интерьер",
+    mood: "спокойная, деловая атмосфера",
+    props: "книжные полки, документы, ноутбук",
+    tags: "офис, защита",
+  },
+  {
+    label: "Аудитория",
+    summary: "университет, кафедра, доска",
+    location_type: "аудитория университета",
+    interior_exterior: "интерьер",
+    mood: "академическая атмосфера",
+    props: "доска, кафедра, учебные материалы",
+    tags: "университет, обучение",
+  },
+  {
+    label: "Допросная",
+    summary: "стол, два стула, зеркало",
+    location_type: "допросная",
+    interior_exterior: "интерьер",
+    mood: "напряженная, давящая атмосфера",
+    props: "стол, два стула, зеркало",
+    tags: "полиция, допрос",
+  },
+  {
+    label: "Улица",
+    summary: "город, вечер, здания",
+    location_type: "городская улица",
+    interior_exterior: "экстерьер",
+    mood: "оживленная атмосфера",
+    props: "фонари, витрины, прохожие",
+    tags: "город, улица",
+  },
+];
+
+const CHARACTER_WIZARD_FIELDS: AIFieldSpec[] = [
+  { key: "name", label: "Название", type: "string" },
+  { key: "description", label: "Описание", type: "string" },
+  {
+    key: "character_type",
+    label: "Тип персонажа",
+    type: "string",
+    options: ["protagonist", "antagonist", "supporting", "background"],
+  },
+  { key: "role_label", label: "Ролевой ярлык", type: "string" },
+  { key: "age_group", label: "Возрастная группа", type: "string" },
+  { key: "build", label: "Телосложение", type: "string" },
+  { key: "face_traits", label: "Черты лица", type: "string" },
+  { key: "hair", label: "Волосы", type: "string" },
+  { key: "accessories", label: "Аксессуары", type: "string" },
+  { key: "outfit", label: "Одежда", type: "string" },
+  { key: "palette", label: "Палитра", type: "string" },
+  { key: "distinctive_features", label: "Отличительные черты", type: "string" },
+  { key: "demeanor", label: "Манера поведения", type: "string" },
+  {
+    key: "voice_profile",
+    label: "Голосовой профиль",
+    type: "string",
+    description: VOICE_PROFILE_FIELD_DESCRIPTION,
+  },
+  { key: "motivation", label: "Мотивация", type: "string" },
+  { key: "legal_status", label: "Правовой статус", type: "string" },
+  { key: "competencies", label: "Компетенции", type: "string" },
+  { key: "taboo", label: "Табу", type: "string" },
+  { key: "style_tags", label: "Теги стиля", type: "string" },
+  { key: "negative_prompt", label: "Негативный промпт", type: "string" },
+  { key: "advanced_prompt", label: "Расширенный промпт", type: "string" },
+];
+
+const LOCATION_WIZARD_FIELDS: AIFieldSpec[] = [
+  { key: "name", label: "Название", type: "string" },
+  { key: "description", label: "Описание", type: "string" },
+  { key: "location_type", label: "Тип локации", type: "string" },
+  { key: "interior_exterior", label: "Интерьер/экстерьер", type: "string" },
+  { key: "era", label: "Эпоха", type: "string" },
+  { key: "time_of_day", label: "Время суток", type: "string" },
+  { key: "style", label: "Стиль", type: "string" },
+  { key: "materials", label: "Материалы", type: "string" },
+  { key: "mood", label: "Настроение", type: "string" },
+  { key: "props", label: "Реквизит", type: "string" },
+  { key: "tags", label: "Теги", type: "string" },
+  { key: "notes", label: "Заметки", type: "string" },
+  { key: "negative_prompt", label: "Негативный промпт", type: "string" },
+  { key: "advanced_prompt", label: "Расширенный промпт", type: "string" },
+];
+
+const AGE_OPTIONS = ["подросток", "молодой взрослый", "средний возраст", "пожилой"];
+const BUILD_OPTIONS = [
+  "стройное телосложение",
+  "среднее телосложение",
+  "атлетичное телосложение",
+  "крупное телосложение",
+];
+const IO_OPTIONS = ["интерьер", "экстерьер"];
+
+const splitList = (value: string) =>
+  value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const compactProfile = <T extends Record<string, unknown>>(profile: T): Partial<T> => {
+  const result: Record<string, unknown> = {};
+  Object.entries(profile).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      if (value.length > 0) result[key] = value;
+      return;
+    }
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) result[key] = trimmed;
+      return;
+    }
+    if (value) {
+      result[key] = value;
+    }
+  });
+  return result as Partial<T>;
+};
+
+const buildCharacterPrompt = (
+  profile: Partial<CharacterAppearanceProfile>,
+  name: string,
+  description: string,
+) => {
+  const parts: string[] = [];
+  if (profile.role_label) parts.push(profile.role_label);
+  if (profile.age_group) parts.push(profile.age_group);
+  if (profile.build) parts.push(profile.build);
+  if (profile.face_traits) parts.push(profile.face_traits);
+  if (profile.hair) parts.push(profile.hair);
+  if (profile.accessories?.length) parts.push(profile.accessories.join(", "));
+  if (profile.outfit) parts.push(profile.outfit);
+  if (profile.palette) parts.push(profile.palette);
+  if (profile.distinctive_features) parts.push(profile.distinctive_features);
+  if (profile.demeanor) parts.push(profile.demeanor);
+  if (description.trim()) parts.push(description.trim());
+  if (!parts.length && name.trim()) parts.push(name.trim());
+  return parts.join(", ");
+};
+
+const buildLocationPrompt = (
+  profile: Partial<LocationVisualProfile>,
+  name: string,
+  description: string,
+) => {
+  const parts: string[] = [];
+  if (profile.location_type) parts.push(profile.location_type);
+  if (profile.interior_exterior) parts.push(profile.interior_exterior);
+  if (profile.era) parts.push(profile.era);
+  if (profile.time_of_day) parts.push(profile.time_of_day);
+  if (profile.style) parts.push(profile.style);
+  if (profile.materials) parts.push(profile.materials);
+  if (profile.mood) parts.push(profile.mood);
+  if (profile.props?.length) parts.push(profile.props.join(", "));
+  if (profile.notes) parts.push(profile.notes);
+  if (description.trim()) parts.push(description.trim());
+  if (!parts.length && name.trim()) parts.push(name.trim());
+  return parts.join(", ");
+};
+
+const normalizePrompt = (prompt: string, fallback: string) => {
+  const base = prompt.trim() || fallback.trim();
+  if (base.length >= 10) return base;
+  return `${base}, персонаж`;
+};
+
+export default function AssetWizardModal({ type, onClose, onCreate }: AssetWizardModalProps) {
+  const isCharacter = type === "character";
+  const steps = isCharacter ? CHARACTER_STEPS : LOCATION_STEPS;
+  const [step, setStep] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [aiCharacterLoading, setAiCharacterLoading] = useState(false);
+  const [aiLocationLoading, setAiLocationLoading] = useState(false);
+  const [aiCharacterError, setAiCharacterError] = useState<string | null>(null);
+  const [aiLocationError, setAiLocationError] = useState<string | null>(null);
+  const [aiFillOpen, setAiFillOpen] = useState(false);
+  const [character, setCharacter] = useState<CharacterWizardState>({
+    name: "",
+    description: "",
+    character_type: "supporting",
+    role_label: "",
+    age_group: "",
+    build: "",
+    face_traits: "",
+    hair: "",
+    accessories: "",
+    outfit: "",
+    palette: "",
+    distinctive_features: "",
+    demeanor: "",
+    voice_profile: "",
+    motivation: "",
+    legal_status: "",
+    competencies: "",
+    taboo: "",
+    style_tags: "",
+    negative_prompt: "",
+    advanced_prompt_enabled: false,
+    advanced_prompt: "",
+    generateSketch: true,
+    generateSheet: true,
+    is_public: false,
+  });
+  const [location, setLocation] = useState<LocationWizardState>({
+    name: "",
+    description: "",
+    location_type: "",
+    interior_exterior: "",
+    era: "",
+    time_of_day: "",
+    style: "",
+    materials: "",
+    mood: "",
+    props: "",
+    tags: "",
+    notes: "",
+    negative_prompt: "",
+    advanced_prompt_enabled: false,
+    advanced_prompt: "",
+    generateSketch: true,
+    generateSheet: true,
+  });
+
+  const characterProfile = useMemo(() =>
+    compactProfile<CharacterAppearanceProfile>({
+      role_label: character.role_label,
+      age_group: character.age_group,
+      build: character.build,
+      face_traits: character.face_traits,
+      hair: character.hair,
+      accessories: splitList(character.accessories),
+      outfit: character.outfit,
+      palette: character.palette,
+      distinctive_features: character.distinctive_features,
+      demeanor: character.demeanor,
+      taboo: character.taboo,
+    }),
+  [character]);
+
+  const locationProfile = useMemo(() =>
+    compactProfile<LocationVisualProfile>({
+      location_type: location.location_type,
+      interior_exterior: location.interior_exterior,
+      era: location.era,
+      time_of_day: location.time_of_day,
+      style: location.style,
+      materials: location.materials,
+      mood: location.mood,
+      props: splitList(location.props),
+      notes: location.notes,
+    }),
+  [location]);
+
+  const rawCharacterPrompt = useMemo(() => {
+    const base = buildCharacterPrompt(characterProfile, character.name, character.description);
+    if (character.advanced_prompt_enabled && character.advanced_prompt.trim()) {
+      return character.advanced_prompt.trim();
+    }
+    return base;
+  }, [characterProfile, character]);
+
+  const rawLocationPrompt = useMemo(() => {
+    const base = buildLocationPrompt(locationProfile, location.name, location.description);
+    if (location.advanced_prompt_enabled && location.advanced_prompt.trim()) {
+      return location.advanced_prompt.trim();
+    }
+    return base;
+  }, [locationProfile, location]);
+
+  const characterPrompt = useMemo(
+    () => normalizePrompt(rawCharacterPrompt, character.name),
+    [rawCharacterPrompt, character.name],
+  );
+
+  const locationPrompt = useMemo(
+    () => (rawLocationPrompt.trim() ? rawLocationPrompt.trim() : location.name.trim()),
+    [rawLocationPrompt, location.name],
+  );
+
+  const handleGenerateCharacterDescription = async () => {
+    if (!character.name.trim()) return;
+    setAiCharacterLoading(true);
+    setAiCharacterError(null);
+    try {
+      const contextParts = [
+        character.role_label ? `role label: ${character.role_label}` : null,
+        character.character_type ? `character type: ${character.character_type}` : null,
+        rawCharacterPrompt ? `visual prompt: ${rawCharacterPrompt}` : null,
+        character.voice_profile ? `voice: ${character.voice_profile}` : null,
+        character.motivation ? `motivation: ${character.motivation}` : null,
+        character.legal_status ? `legal status: ${character.legal_status}` : null,
+      ].filter(Boolean);
+      const response = await generateDescription({
+        entity_type: "character",
+        name: character.name.trim(),
+        context: contextParts.join("\n"),
+      });
+      setCharacter((prev) => ({ ...prev, description: response.description || "" }));
+    } catch (err: any) {
+      setAiCharacterError(err?.message || "Не удалось сгенерировать описание.");
+    } finally {
+      setAiCharacterLoading(false);
+    }
+  };
+
+  const handleGenerateLocationDescription = async () => {
+    if (!location.name.trim()) return;
+    setAiLocationLoading(true);
+    setAiLocationError(null);
+    try {
+      const contextParts = [
+        location.location_type ? `type: ${location.location_type}` : null,
+        location.interior_exterior ? `interior/exterior: ${location.interior_exterior}` : null,
+        location.era ? `era: ${location.era}` : null,
+        location.time_of_day ? `time of day: ${location.time_of_day}` : null,
+        rawLocationPrompt ? `visual prompt: ${rawLocationPrompt}` : null,
+      ].filter(Boolean);
+      const response = await generateDescription({
+        entity_type: "location",
+        name: location.name.trim(),
+        context: contextParts.join("\n"),
+      });
+      setLocation((prev) => ({ ...prev, description: response.description || "" }));
+    } catch (err: any) {
+      setAiLocationError(err?.message || "Не удалось сгенерировать описание.");
+    } finally {
+      setAiLocationLoading(false);
+    }
+  };
+
+  const toStringValue = (value: unknown) =>
+    typeof value === "string" ? value : value === null || value === undefined ? null : String(value);
+
+  const handleApplyFill = (values: Record<string, unknown>) => {
+    if (isCharacter) {
+      setCharacter((prev) => ({
+        ...prev,
+        name: toStringValue(values.name) ?? prev.name,
+        description: toStringValue(values.description) ?? prev.description,
+        character_type:
+          values.character_type === "protagonist" ||
+          values.character_type === "antagonist" ||
+          values.character_type === "supporting" ||
+          values.character_type === "background"
+            ? values.character_type
+            : prev.character_type,
+        role_label: toStringValue(values.role_label) ?? prev.role_label,
+        age_group: toStringValue(values.age_group) ?? prev.age_group,
+        build: toStringValue(values.build) ?? prev.build,
+        face_traits: toStringValue(values.face_traits) ?? prev.face_traits,
+        hair: toStringValue(values.hair) ?? prev.hair,
+        accessories: toStringValue(values.accessories) ?? prev.accessories,
+        outfit: toStringValue(values.outfit) ?? prev.outfit,
+        palette: toStringValue(values.palette) ?? prev.palette,
+        distinctive_features: toStringValue(values.distinctive_features) ?? prev.distinctive_features,
+        demeanor: toStringValue(values.demeanor) ?? prev.demeanor,
+        voice_profile: toStringValue(values.voice_profile) ?? prev.voice_profile,
+        motivation: toStringValue(values.motivation) ?? prev.motivation,
+        legal_status: toStringValue(values.legal_status) ?? prev.legal_status,
+        competencies: toStringValue(values.competencies) ?? prev.competencies,
+        taboo: toStringValue(values.taboo) ?? prev.taboo,
+        style_tags: toStringValue(values.style_tags) ?? prev.style_tags,
+        negative_prompt: toStringValue(values.negative_prompt) ?? prev.negative_prompt,
+        advanced_prompt: toStringValue(values.advanced_prompt) ?? prev.advanced_prompt,
+      }));
+    } else {
+      setLocation((prev) => ({
+        ...prev,
+        name: toStringValue(values.name) ?? prev.name,
+        description: toStringValue(values.description) ?? prev.description,
+        location_type: toStringValue(values.location_type) ?? prev.location_type,
+        interior_exterior: toStringValue(values.interior_exterior) ?? prev.interior_exterior,
+        era: toStringValue(values.era) ?? prev.era,
+        time_of_day: toStringValue(values.time_of_day) ?? prev.time_of_day,
+        style: toStringValue(values.style) ?? prev.style,
+        materials: toStringValue(values.materials) ?? prev.materials,
+        mood: toStringValue(values.mood) ?? prev.mood,
+        props: toStringValue(values.props) ?? prev.props,
+        tags: toStringValue(values.tags) ?? prev.tags,
+        notes: toStringValue(values.notes) ?? prev.notes,
+        negative_prompt: toStringValue(values.negative_prompt) ?? prev.negative_prompt,
+        advanced_prompt: toStringValue(values.advanced_prompt) ?? prev.advanced_prompt,
+      }));
+    }
+  };
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      if (isCharacter) {
+        const competencies = splitList(character.competencies);
+        const styleTags = splitList(character.style_tags);
+        const payload: Partial<CharacterPreset> = {
+          name: character.name.trim(),
+          description: character.description.trim() || null,
+          character_type: character.character_type,
+          appearance_prompt: characterPrompt.trim() || character.name.trim(),
+          negative_prompt: character.negative_prompt.trim() || null,
+          appearance_profile: Object.keys(characterProfile).length ? characterProfile : null,
+          voice_profile: character.voice_profile.trim() || null,
+          motivation: character.motivation.trim() || null,
+          legal_status: character.legal_status.trim() || null,
+          competencies: competencies.length ? competencies : null,
+          style_tags: styleTags.length ? styleTags : null,
+          artifact_refs: null,
+          relationships: null,
+          is_public: character.is_public,
+        };
+        await onCreate({
+          type: "character",
+          payload,
+          generateSketch: character.generateSketch,
+          generateSheet: character.generateSheet,
+        });
+      } else {
+        const tags = splitList(location.tags);
+        const payload: Partial<Location> = {
+          name: location.name.trim(),
+          description: location.description.trim() || null,
+          visual_reference: locationPrompt.trim() || location.name.trim(),
+          negative_prompt: location.negative_prompt.trim() || null,
+          tags: tags.length ? tags : null,
+          atmosphere_rules: null,
+          location_metadata: Object.keys(locationProfile).length
+            ? { visual_profile: locationProfile }
+            : null,
+        };
+        await onCreate({
+          type: "location",
+          payload,
+          generateSketch: location.generateSketch,
+          generateSheet: location.generateSheet,
+        });
+      }
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || "Не удалось создать ассет.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const canAdvance = isCharacter
+    ? Boolean(character.name.trim())
+    : Boolean(location.name.trim());
+
+  const canSubmit = isCharacter
+    ? Boolean(character.name.trim() && characterPrompt.trim())
+    : Boolean(location.name.trim() && locationPrompt.trim());
+
+  const renderCharacterStep = () => {
+    switch (step) {
+      case 0:
+        return (
+          <div className="aw-step-body">
+            <div className="aw-templates">
+              {CHARACTER_TEMPLATES.map((template) => (
+                <button
+                  key={template.label}
+                  type="button"
+                  className="aw-template-card"
+                  onClick={() =>
+                    setCharacter((prev) => ({
+                      ...prev,
+                      name: prev.name || template.label,
+                      role_label: template.role_label,
+                      character_type: template.character_type,
+                      outfit: template.outfit,
+                      demeanor: template.demeanor,
+                      voice_profile: template.voice_profile,
+                      legal_status: template.legal_status,
+                    }))
+                  }
+                >
+                  <strong>{template.label}</strong>
+                  <span>{template.summary}</span>
+                </button>
+              ))}
+            </div>
+            <div className="aw-grid">
+              <label className="aw-field">
+                <span>Имя *</span>
+                <input
+                  className="aw-input"
+                  value={character.name}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, name: event.target.value }))
+                  }
+                  placeholder="Мария Иванова"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Роль (для промпта)</span>
+                <input
+                  className="aw-input"
+                  value={character.role_label}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, role_label: event.target.value }))
+                  }
+                  placeholder="судья / адвокат / свидетель"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Тип персонажа</span>
+                <select
+                  className="aw-select"
+                  value={character.character_type}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, character_type: event.target.value }))
+                  }
+                >
+                  <option value="protagonist">Главный герой</option>
+                  <option value="antagonist">Антагонист</option>
+                  <option value="supporting">Второстепенный</option>
+                  <option value="background">Фоновый</option>
+                </select>
+              </label>
+              <label className="aw-field aw-field-wide">
+                <span className="aw-field-header">
+                  <span>Описание</span>
+                  <button
+                    className="ghost"
+                    type="button"
+                    onClick={handleGenerateCharacterDescription}
+                    disabled={!character.name.trim() || aiCharacterLoading}
+                  >
+                    {aiCharacterLoading ? "Генерация..." : "Спросить AI"}
+                  </button>
+                </span>
+                <textarea
+                  className="aw-textarea"
+                  rows={2}
+                  value={character.description}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, description: event.target.value }))
+                  }
+                  placeholder="Кто этот персонаж и зачем он в истории"
+                />
+                {aiCharacterError && <span className="aw-error">{aiCharacterError}</span>}
+              </label>
+            </div>
+          </div>
+        );
+      case 1:
+        return (
+          <div className="aw-step-body">
+            <div className="aw-grid">
+              <label className="aw-field">
+                <span>Возрастная группа</span>
+                <select
+                  className="aw-select"
+                  value={character.age_group}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, age_group: event.target.value }))
+                  }
+                >
+                  <option value="">Не указано</option>
+                  {AGE_OPTIONS.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="aw-field">
+                <span>Телосложение</span>
+                <select
+                  className="aw-select"
+                  value={character.build}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, build: event.target.value }))
+                  }
+                >
+                  <option value="">Не указано</option>
+                  {BUILD_OPTIONS.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="aw-field">
+                <span>Черты лица</span>
+                <input
+                  className="aw-input"
+                  value={character.face_traits}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, face_traits: event.target.value }))
+                  }
+                  placeholder="овальное лицо, выразительные скулы"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Волосы</span>
+                <input
+                  className="aw-input"
+                  value={character.hair}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, hair: event.target.value }))
+                  }
+                  placeholder="короткие темные волосы"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Аксессуары (через запятую)</span>
+                <input
+                  className="aw-input"
+                  value={character.accessories}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, accessories: event.target.value }))
+                  }
+                  placeholder="очки, значок, часы"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Одежда по умолчанию</span>
+                <input
+                  className="aw-input"
+                  value={character.outfit}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, outfit: event.target.value }))
+                  }
+                  placeholder="темный костюм, белая рубашка"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Палитра / цветовые акценты</span>
+                <input
+                  className="aw-input"
+                  value={character.palette}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, palette: event.target.value }))
+                  }
+                  placeholder="темно-синий, серый"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Особые приметы</span>
+                <input
+                  className="aw-input"
+                  value={character.distinctive_features}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, distinctive_features: event.target.value }))
+                  }
+                  placeholder="шрам над бровью, родинка"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Манера / выражение</span>
+                <input
+                  className="aw-input"
+                  value={character.demeanor}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, demeanor: event.target.value }))
+                  }
+                  placeholder="сдержанная улыбка, строгий взгляд"
+                />
+              </label>
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="aw-step-body">
+            <div className="aw-grid">
+              <label className="aw-field">
+                <span>Голос / стиль речи</span>
+                <input
+                  className="aw-input"
+                  value={character.voice_profile}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, voice_profile: event.target.value }))
+                  }
+                  placeholder={VOICE_PROFILE_PLACEHOLDER}
+                />
+              </label>
+              <label className="aw-field">
+                <span>Мотивация</span>
+                <input
+                  className="aw-input"
+                  value={character.motivation}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, motivation: event.target.value }))
+                  }
+                  placeholder="добиться справедливости"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Процессуальный статус</span>
+                <input
+                  className="aw-input"
+                  value={character.legal_status}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, legal_status: event.target.value }))
+                  }
+                  placeholder="судья / прокурор / свидетель"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Компетенции (через запятую)</span>
+                <input
+                  className="aw-input"
+                  value={character.competencies}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, competencies: event.target.value }))
+                  }
+                  placeholder="переговоры, анализ доказательств"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Табу / ограничения</span>
+                <input
+                  className="aw-input"
+                  value={character.taboo}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, taboo: event.target.value }))
+                  }
+                  placeholder="не повышает голос, не раскрывает тайны"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Теги стиля (через запятую)</span>
+                <input
+                  className="aw-input"
+                  value={character.style_tags}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, style_tags: event.target.value }))
+                  }
+                  placeholder="cinematic, realistic"
+                />
+              </label>
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="aw-step-body">
+            <label className="aw-toggle">
+              <input
+                type="checkbox"
+                checked={character.generateSketch}
+                onChange={(event) =>
+                  setCharacter((prev) => ({ ...prev, generateSketch: event.target.checked }))
+                }
+              />
+              <span>Сгенерировать черновой скетч сразу после создания</span>
+            </label>
+            <div className="aw-hint">
+              Быстрый скетч помогает зафиксировать общий образ до генерации референсов.
+            </div>
+          </div>
+        );
+      case 4:
+        return (
+          <div className="aw-step-body">
+            <label className="aw-toggle">
+              <input
+                type="checkbox"
+                checked={character.generateSheet}
+                onChange={(event) =>
+                  setCharacter((prev) => ({ ...prev, generateSheet: event.target.checked }))
+                }
+              />
+              <span>Сгенерировать референс-лист (фронт/профиль/спина)</span>
+            </label>
+            <label className="aw-field aw-field-wide">
+              <span>Негативный промпт (необязательно)</span>
+              <textarea
+                className="aw-textarea"
+                rows={2}
+                value={character.negative_prompt}
+                onChange={(event) =>
+                  setCharacter((prev) => ({ ...prev, negative_prompt: event.target.value }))
+                }
+                placeholder="low quality, extra fingers"
+              />
+            </label>
+            <label className="aw-toggle">
+              <input
+                type="checkbox"
+                checked={character.advanced_prompt_enabled}
+                onChange={(event) =>
+                  setCharacter((prev) => ({ ...prev, advanced_prompt_enabled: event.target.checked }))
+                }
+              />
+              <span>Расширенный промпт (необязательно, перекрывает автосборку)</span>
+            </label>
+            {character.advanced_prompt_enabled && (
+              <label className="aw-field aw-field-wide">
+                <textarea
+                  className="aw-textarea"
+                  rows={3}
+                  value={character.advanced_prompt}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({ ...prev, advanced_prompt: event.target.value }))
+                  }
+                  placeholder="полный SD-промпт, если нужно ручное управление"
+                />
+              </label>
+            )}
+            <div className="aw-preview">
+              <div className="aw-preview-title">Итоговый промпт</div>
+              <code>{characterPrompt || "—"}</code>
+              <div className="aw-hint">Anchor token будет сгенерирован автоматически.</div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderLocationStep = () => {
+    switch (step) {
+      case 0:
+        return (
+          <div className="aw-step-body">
+            <div className="aw-templates">
+              {LOCATION_TEMPLATES.map((template) => (
+                <button
+                  key={template.label}
+                  type="button"
+                  className="aw-template-card"
+                  onClick={() =>
+                    setLocation((prev) => ({
+                      ...prev,
+                      name: prev.name || template.label,
+                      location_type: template.location_type,
+                      interior_exterior: template.interior_exterior,
+                      mood: template.mood,
+                      props: template.props,
+                      tags: template.tags,
+                    }))
+                  }
+                >
+                  <strong>{template.label}</strong>
+                  <span>{template.summary}</span>
+                </button>
+              ))}
+            </div>
+            <div className="aw-grid">
+              <label className="aw-field">
+                <span>Название *</span>
+                <input
+                  className="aw-input"
+                  value={location.name}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, name: event.target.value }))
+                  }
+                  placeholder="Зал суда"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Тип локации</span>
+                <input
+                  className="aw-input"
+                  value={location.location_type}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, location_type: event.target.value }))
+                  }
+                  placeholder="зал суда / кабинет / улица"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Интерьер / экстерьер</span>
+                <select
+                  className="aw-select"
+                  value={location.interior_exterior}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, interior_exterior: event.target.value }))
+                  }
+                >
+                  <option value="">Не указано</option>
+                  {IO_OPTIONS.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="aw-field">
+                <span>Эпоха</span>
+                <input
+                  className="aw-input"
+                  value={location.era}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, era: event.target.value }))
+                  }
+                  placeholder="современность, 90-е"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Время суток</span>
+                <input
+                  className="aw-input"
+                  value={location.time_of_day}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, time_of_day: event.target.value }))
+                  }
+                  placeholder="утро, вечер"
+                />
+              </label>
+              <label className="aw-field aw-field-wide">
+                <span className="aw-field-header">
+                  <span>Краткое описание</span>
+                  <button
+                    className="ghost"
+                    type="button"
+                    onClick={handleGenerateLocationDescription}
+                    disabled={!location.name.trim() || aiLocationLoading}
+                  >
+                    {aiLocationLoading ? "Генерация..." : "Спросить AI"}
+                  </button>
+                </span>
+                <textarea
+                  className="aw-textarea"
+                  rows={2}
+                  value={location.description}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, description: event.target.value }))
+                  }
+                  placeholder="Высокие потолки, светлое дерево, строгий интерьер"
+                />
+                {aiLocationError && <span className="aw-error">{aiLocationError}</span>}
+              </label>
+            </div>
+          </div>
+        );
+      case 1:
+        return (
+          <div className="aw-step-body">
+            <div className="aw-grid">
+              <label className="aw-field">
+                <span>Стиль</span>
+                <input
+                  className="aw-input"
+                  value={location.style}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, style: event.target.value }))
+                  }
+                  placeholder="классика, минимализм"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Материалы / текстуры</span>
+                <input
+                  className="aw-input"
+                  value={location.materials}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, materials: event.target.value }))
+                  }
+                  placeholder="темное дерево, металл"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Атмосфера / настроение</span>
+                <input
+                  className="aw-input"
+                  value={location.mood}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, mood: event.target.value }))
+                  }
+                  placeholder="строгая, напряженная"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Ключевые объекты (через запятую)</span>
+                <input
+                  className="aw-input"
+                  value={location.props}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, props: event.target.value }))
+                  }
+                  placeholder="трибуна, флаг, герб"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Теги (через запятую)</span>
+                <input
+                  className="aw-input"
+                  value={location.tags}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, tags: event.target.value }))
+                  }
+                  placeholder="суд, драма"
+                />
+              </label>
+              <label className="aw-field">
+                <span>Негативный промпт</span>
+                <textarea
+                  className="aw-textarea"
+                  rows={2}
+                  value={location.negative_prompt}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, negative_prompt: event.target.value }))
+                  }
+                  placeholder="no neon, no futuristic"
+                />
+              </label>
+              <label className="aw-field aw-field-wide">
+                <span>Дополнительные заметки</span>
+                <input
+                  className="aw-input"
+                  value={location.notes}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, notes: event.target.value }))
+                  }
+                  placeholder="например: много дневного света"
+                />
+              </label>
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="aw-step-body">
+            <label className="aw-toggle">
+              <input
+                type="checkbox"
+                checked={location.generateSketch}
+                onChange={(event) =>
+                  setLocation((prev) => ({ ...prev, generateSketch: event.target.checked }))
+                }
+              />
+              <span>Сгенерировать черновой скетч сразу после создания</span>
+            </label>
+            <div className="aw-hint">
+              Скетч фиксирует общее освещение и композицию перед референс-сетом.
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="aw-step-body">
+            <label className="aw-toggle">
+              <input
+                type="checkbox"
+                checked={location.generateSheet}
+                onChange={(event) =>
+                  setLocation((prev) => ({ ...prev, generateSheet: event.target.checked }))
+                }
+              />
+              <span>Сгенерировать референс-набор (общий / интерьер / детали)</span>
+            </label>
+            <label className="aw-toggle">
+              <input
+                type="checkbox"
+                checked={location.advanced_prompt_enabled}
+                onChange={(event) =>
+                  setLocation((prev) => ({ ...prev, advanced_prompt_enabled: event.target.checked }))
+                }
+              />
+              <span>Расширенный промпт (необязательно)</span>
+            </label>
+            {location.advanced_prompt_enabled && (
+              <label className="aw-field aw-field-wide">
+                <textarea
+                  className="aw-textarea"
+                  rows={3}
+                  value={location.advanced_prompt}
+                  onChange={(event) =>
+                    setLocation((prev) => ({ ...prev, advanced_prompt: event.target.value }))
+                  }
+                  placeholder="полный SD-промпт для локации"
+                />
+              </label>
+            )}
+            <div className="aw-preview">
+              <div className="aw-preview-title">Итоговый промпт</div>
+              <code>{locationPrompt || "—"}</code>
+              <div className="aw-hint">Anchor token будет сгенерирован автоматически.</div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="aw-overlay" onClick={onClose}>
+      <div className="aw-modal" onClick={(event) => event.stopPropagation()}>
+        <div className="aw-header">
+          <div>
+            <div className="aw-kicker">Мастер</div>
+            <h2>{isCharacter ? "Создание персонажа" : "Создание локации"}</h2>
+            <p>Заполните профиль — промпт соберется автоматически.</p>
+          </div>
+          <button className="aw-close" type="button" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <div className="aw-steps">
+          {steps.map((label, index) => (
+            <div
+              key={label}
+              className={`aw-step ${index === step ? "active" : index < step ? "done" : ""}`}
+            >
+              <span className="aw-step-index">{index + 1}</span>
+              <span className="aw-step-label">{label}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="aw-body">
+          {error && <div className="aw-error">{error}</div>}
+          {isCharacter ? renderCharacterStep() : renderLocationStep()}
+        </div>
+
+        <div className="aw-footer">
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => setStep((prev) => Math.max(prev - 1, 0))}
+            disabled={step === 0 || saving}
+          >
+            Назад
+          </button>
+          <div className="aw-footer-right">
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => setAiFillOpen(true)}
+              disabled={saving}
+            >AI заполнение</button>
+            {step < steps.length - 1 ? (
+              <button
+                type="button"
+                className="primary"
+                onClick={() => setStep((prev) => Math.min(prev + 1, steps.length - 1))}
+                disabled={!canAdvance || saving}
+              >
+                Далее
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="primary"
+                onClick={handleSubmit}
+                disabled={!canSubmit || saving}
+              >
+                {saving ? "Создание..." : "Создать"}
+              </button>
+            )}
+          </div>
+        </div>
+        {aiFillOpen && (
+          <AIFillModal
+            title={isCharacter ? "Мастер персонажа" : "Мастер локации"}
+            formType={isCharacter ? "wizard_character" : "wizard_location"}
+            fields={isCharacter ? CHARACTER_WIZARD_FIELDS : LOCATION_WIZARD_FIELDS}
+            currentValues={isCharacter ? character : location}
+            context={
+              isCharacter
+                ? `name: ${character.name}\\nrole: ${character.character_type}`
+                : `name: ${location.name}\\ntype: ${location.location_type}`
+            }
+            onApply={handleApplyFill}
+            onClose={() => setAiFillOpen(false)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}

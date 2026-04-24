@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "step3-slides.schema.json",
+  "title": "WizardStep3Response",
+  "type": "object",
+  "required": [
+    "data",
+    "meta"
+  ],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": [
+        "scenes"
+      ],
+      "properties": {
+        "scenes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "scene_id",
+              "slides"
+            ],
+            "properties": {
+              "scene_id": {
+                "type": "string"
+              },
+              "slides": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "order",
+                    "visual"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "order": {
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "exposition": {
+                      "type": "string"
+                    },
+                    "thought": {
+                      "type": "string"
+                    },
+                    "dialogue": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "speaker",
+                          "text"
+                        ],
+                        "properties": {
+                          "speaker": {
+                            "type": "string"
+                          },
+                          "text": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "visual": {
+                      "type": "string"
+                    },
+                    "cast_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "location_id": {
+                      "type": "string"
+                    },
+                    "framing": {
+                      "type": "string",
+                      "enum": [
+                        "full",
+                        "half",
+                        "portrait"
+                      ]
+                    },
+                    "allow_background_extras": {
+                      "type": "boolean"
+                    },
+                    "background_extras_count": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "background_extras_min": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "background_extras_max": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "background_extras_note": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "meta": {
+      "$ref": "wizard-meta.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

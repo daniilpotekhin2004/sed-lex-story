@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "step2-detail.schema.json",
+  "title": "WizardStep2Response",
+  "type": "object",
+  "required": [
+    "data",
+    "meta"
+  ],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": [
+        "characters",
+        "locations"
+      ],
+      "properties": {
+        "characters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "description",
+              "appearance",
+              "role",
+              "status"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "new",
+                  "existing"
+                ]
+              },
+              "existing_asset_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "character_type": {
+                "type": "string",
+                "enum": [
+                  "protagonist",
+                  "antagonist",
+                  "supporting",
+                  "background"
+                ]
+              },
+              "appearance": {
+                "type": "object",
+                "properties": {
+                  "age_group": {
+                    "type": "string"
+                  },
+                  "build": {
+                    "type": "string"
+                  },
+                  "face_traits": {
+                    "type": "string"
+                  },
+                  "hair": {
+                    "type": "string"
+                  },
+                  "accessories": {
+                    "type": "string"
+                  },
+                  "outfit": {
+                    "type": "string"
+                  },
+                  "palette": {
+                    "type": "string"
+                  },
+                  "distinctive_features": {
+                    "type": "string"
+                  },
+                  "demeanor": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "voice_profile": {
+                "type": "string"
+              },
+              "motivation": {
+                "type": "string"
+              },
+              "legal_status": {
+                "type": "string"
+              },
+              "competencies": {
+                "type": "string"
+              },
+              "taboo": {
+                "type": "string"
+              },
+              "style_tags": {
+                "type": "string"
+              },
+              "prompt": {
+                "type": "string"
+              },
+              "negative_prompt": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "approved",
+                  "rejected"
+                ]
+              },
+              "notes": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "description",
+              "visual_reference",
+              "status"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "new",
+                  "existing"
+                ]
+              },
+              "existing_asset_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "location_type": {
+                "type": "string"
+              },
+              "interior_exterior": {
+                "type": "string"
+              },
+              "era": {
+                "type": "string"
+              },
+              "time_of_day": {
+                "type": "string"
+              },
+              "style": {
+                "type": "string"
+              },
+              "materials": {
+                "type": "string"
+              },
+              "mood": {
+                "type": "string"
+              },
+              "props": {
+                "type": "string"
+              },
+              "tags": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              },
+              "visual_reference": {
+                "type": "string"
+              },
+              "negative_prompt": {
+                "type": "string"
+              },
+              "advanced_prompt": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "approved",
+                  "rejected"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "meta": {
+      "$ref": "wizard-meta.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

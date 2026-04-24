@@ -1,0 +1,102 @@
+{
+  "version": "1.0",
+  "description": "Multi-view character generation configuration",
+  "default_workflow": {
+    "initial_generation": {
+      "workflow_set": "custom",
+      "workflow_task": "character_txt2img",
+      "steps": 44,
+      "guidance": 5,
+      "denoise": 1.0,
+      "width": 832,
+      "height": 1216
+    },
+    "view_generation": {
+      "workflow_set": "custom",
+      "workflow_task": "character_img2img",
+      "steps": 44,
+      "base_denoise": 0.75,
+      "base_guidance": 5
+    }
+  },
+  "generation_pipeline": {
+    "stage1_txt2img": {
+      "description": "Generate initial character from text description",
+      "use_full_prompt": true,
+      "save_description": true
+    },
+    "stage2_multiview": {
+      "description": "Generate multiple views from initial image",
+      "use_reference_image": true,
+      "pass_base_description": true,
+      "generate_views_sequentially": true
+    }
+  },
+  "view_configurations": {
+    "front_view": {
+      "prompt_suffix": "front view, facing camera, full body portrait, standing pose, neutral expression",
+      "negative_suffix": "side view, back view, profile, turned away",
+      "denoise": 0.75,
+      "guidance": 5
+    },
+    "side_profile": {
+      "prompt_suffix": "side profile view, 90 degree angle, full body, standing pose, clean profile silhouette",
+      "negative_suffix": "front view, back view, facing camera, three-quarter view",
+      "denoise": 0.7,
+      "guidance": 5
+    },
+    "three_quarter": {
+      "prompt_suffix": "three-quarter view, 45 degree angle, full body, dynamic pose, detailed features",
+      "negative_suffix": "front view, side view, back view, straight on",
+      "denoise": 0.8,
+      "guidance": 5
+    },
+    "back_view": {
+      "prompt_suffix": "back view, rear angle, full body, standing pose, showing back details",
+      "negative_suffix": "front view, side view, facing camera, profile",
+      "denoise": 0.7,
+      "guidance": 5
+    },
+    "close_up": {
+      "prompt_suffix": "close-up portrait, head and shoulders, detailed facial features, high detail",
+      "negative_suffix": "full body, distant view, wide shot, multiple people",
+      "denoise": 0.85,
+      "guidance": 5
+    }
+  },
+  "prompt_templates": {
+    "base_character_prompt": "{character_description}, high quality, detailed, professional artwork, consistent character design",
+    "view_specific_prompt": "{base_description}, {view_suffix}",
+    "negative_base": "blurry, low quality, inconsistent, multiple people, deformed, {view_negative}",
+    "style_consistency": "same character, consistent appearance, matching outfit, identical person"
+  },
+  "processing_options": {
+    "preserve_character_identity": true,
+    "maintain_style_consistency": true,
+    "use_reference_strength": 0.8,
+    "sequential_processing": true,
+    "save_intermediate_results": true,
+    "use_batched_generation": true,
+    "batched_workflow_task": "character_multiview_batched"
+  },
+  "batched_workflow": {
+    "workflow_set": "custom",
+    "workflow_task": "character_multiview_batched",
+    "steps": 20,
+    "guidance_base": 3.8,
+    "output_nodes": [
+      "39",
+      "40",
+      "41",
+      "42",
+      "43"
+    ],
+    "view_mapping": {
+      "39": "front_view",
+      "40": "side_profile",
+      "41": "three_quarter",
+      "42": "back_view",
+      "43": "close_up"
+    }
+  }
+}

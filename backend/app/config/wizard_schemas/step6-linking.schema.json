@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "step6-linking.schema.json",
+  "title": "WizardStep6Response",
+  "type": "object",
+  "required": [
+    "data",
+    "meta"
+  ],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": [
+        "links"
+      ],
+      "properties": {
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "scene_id",
+              "character_ids"
+            ],
+            "properties": {
+              "scene_id": {
+                "type": "string"
+              },
+              "slide_id": {
+                "type": "string"
+              },
+              "character_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "location_id": {
+                "type": "string"
+              },
+              "framing": {
+                "type": "string",
+                "enum": [
+                  "full",
+                  "half",
+                  "portrait"
+                ]
+              },
+              "notes": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "meta": {
+      "$ref": "wizard-meta.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

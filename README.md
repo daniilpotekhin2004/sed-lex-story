@@ -1,12 +1,39 @@
-casual clothing
-fantasy outfit
-modern dress
-simple tunic
-elegant attire
-practical armor
-everyday clothes
-formal wear
-adventurer gear
-simple robe
-battle outfit
-ceremonial garb
+# Пакет оригинальных материалов LexQuest
+
+Этот архив собран как компактный набор исходных материалов для внешней ревизии и подготовки текста о проекте.
+
+Внутри оставлены:
+- исходный код прикладочного бэкенда (`backend/app`);
+- исходный код фронтенда (`frontend/src`);
+- миграции БД и тесты;
+- workflow-конфиги и текстовые шаблоны, связанные с генерацией;
+- несколько markdown-документов, которые объясняют продуктовую логику и устройство пайплайна.
+
+Специально исключены:
+- `node_modules`, `.venv`, `dist`, `build`, `__pycache__`, `.pyc`;
+- базы данных, логи, временные файлы, бинарные артефакты;
+- изображения, аудио, архивы, большие `.docx`, резервные копии и служебные дампы;
+- типовая инфраструктурная обвязка, если она не помогает понять сам продукт.
+
+Краткая карта содержимого:
+- `backend/app` — FastAPI-бэкенд, доменные модели, сервисы, API-роуты, интеграции с LLM/ComfyUI/TTS.
+- `backend/alembic_migrations` — эволюция схемы данных проекта.
+- `backend/tests` — тесты ключевых сценариев API и сервисного слоя.
+- `frontend/src` — React/TypeScript-интерфейс проекта, редакторы, библиотека мира, плеер, голосовые и генеративные экраны.
+- `tools/workflows` и `tools/comfyui_wildcards` — конфиги и текстовые строительные блоки для генеративных workflow.
+- `docs` и корневые `.md` — пояснения по creative mode, авторингу квестов, pipeline profiles и потоку параметров.
+
+Если читать пакет как материал для текста, разумный порядок такой:
+1. `docs/CREATIVE_MODE_GUIDE_RU.md`
+2. `docs/QUEST_AUTHORING_GUIDE_RU.md`
+3. `frontend/README.md`
+4. `backend/app/main.py`
+5. `backend/app/services/wizard.py`
+6. `backend/app/services/narrative_ai.py`
+7. `docs/PIPELINE_PROFILE.md`
+8. `docs/WORKFLOW_PARAMETER_FLOW.md`
+9. `GENERATION_FLOW.md`
+10. `WORKFLOWS.md`
+
+Замечание по архиву:
+- В markdown-файлах могут встречаться ссылки на изображения, которые сознательно не приложены, чтобы пакет оставался легким.

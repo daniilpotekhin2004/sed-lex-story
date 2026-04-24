@@ -1,0 +1,74 @@
+{
+  "default": "cloud_api",
+  "sets": {
+    "qwen": {
+      "label": "Qwen (9-step) — balanced quality",
+      "paths": {
+        "scene_txt2img": "sets/qwen/scene_txt2img.json",
+        "scene_img2img": "sets/qwen/scene_img2img.json",
+        "character_txt2img": "sets/qwen/character_txt2img.json",
+        "character_img2img": "sets/qwen/character_img2img.json"
+      }
+    },
+    "flux4bit": {
+      "label": "FLUX (4-bit GGUF) — high quality / heavy",
+      "paths": {
+        "scene_txt2img": "sets/flux4bit/scene_txt2img.json",
+        "scene_img2img": "sets/flux4bit/scene_img2img.json",
+        "character_txt2img": "sets/flux4bit/character_txt2img.json",
+        "character_img2img": "sets/flux4bit/character_img2img.json"
+      }
+    },
+    "mixed_cn_ipadapter": {
+      "label": "Mixed — ControlNet scene control + IP-Adapter identity",
+      "paths": {
+        "scene_txt2img": "sets/mixed_cn_ipadapter/scene_txt2img.json",
+        "scene_img2img": "sets/mixed_cn_ipadapter/scene_img2img.json",
+        "character_txt2img": "sets/mixed_cn_ipadapter/character_txt2img.json",
+        "character_img2img": "sets/mixed_cn_ipadapter/character_img2img.json"
+      }
+    },
+    "fast": {
+      "label": "Fast — cheap preview / prototyping",
+      "paths": {
+        "scene_txt2img": "sets/fast/scene_txt2img.json",
+        "scene_img2img": "sets/fast/scene_img2img.json",
+        "character_txt2img": "sets/fast/character_txt2img.json",
+        "character_img2img": "sets/fast/character_img2img.json"
+      }
+    },
+    "custom": {
+      "label": "Custom FLUX — high quality with multi-view support",
+      "paths": {
+        "scene_txt2img": "sets/custom/scene_txt2img.json",
+        "scene_img2img": "sets/custom/scene_img2img.json",
+        "character_txt2img": "sets/custom/character_txt2img.json",
+        "character_img2img": "sets/custom/character_img2img.json",
+        "character_multiview": "sets/custom/character_multiview.json",
+        "character_multiview_batched": "sets/custom/character_multiview_batched.json"
+      }
+    },
+    "cloud_api": {
+      "label": "Cloud API — ComfyUI Cloud with standard nodes",
+      "paths": {
+    "location_txt2img": "sets/cloud_api/location_txt2img.json",
+    "scene_img2img": "sets/cloud_api/scene_img2img.json",
+        "scene_txt2img": "sets/cloud_api/scene_txt2img.json",
+        "scene_img2img": "sets/cloud_api/scene_img2img.json",
+        "character_txt2img": "sets/cloud_api/character_txt2img.json",
+        "character_img2img": "sets/cloud_api/character_img2img.json"
+      }
+    },
+    "cloud_api_fallback": {
+      "label": "Cloud API — Flux img2img fallback (denoise ref)",
+      "paths": {
+    "location_txt2img": "sets/cloud_api/location_txt2img.json",
+    "scene_img2img": "sets/cloud_api/scene_img2img.json",
+        "scene_txt2img": "sets/cloud_api/scene_txt2img.json",
+        "scene_img2img": "sets/cloud_api/scene_img2img.json",
+        "character_txt2img": "sets/cloud_api/character_txt2img.json",
+        "character_img2img": "sets/cloud_api/character_img2img_fallback.json"
+      }
+    }
+  }
+}

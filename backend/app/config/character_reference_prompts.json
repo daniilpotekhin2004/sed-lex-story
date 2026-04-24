@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "description": "Prompts for character reference sheet slots and view-specific guidance.",
+  "sheet_prompt_prefix": "Generate a clean full-body reference view of character shown in the picture, keeping face details, age, identity, outfit and hairstyle consistent, they must be same.",
+  "wildcards_enabled": true,
+  "wildcards": {
+    "pose_front": [
+      "standing pose",
+      "contrapposto stance",
+      "mid-stride pose",
+      "kneeling pose"
+    ],
+    "pose_side": [
+      "standing pose",
+      "mid-stride pose",
+      "leaning forward slightly",
+      "kneeling pose"
+    ],
+    "pose_back": [
+      "standing pose",
+      "mid-stride pose",
+      "weight shifted to one leg",
+      "kneeling pose"
+    ],
+    "pose_dynamic": [
+      "three-quarter view",
+      "dynamic turn",
+      "subtle twist",
+      "slight lean"
+    ],
+    "gaze_front": [
+      "looking at camera",
+      "looking slightly off-camera",
+      "downward gaze",
+      "upward gaze"
+    ],
+    "gaze_side": [
+      "looking forward",
+      "looking downward",
+      "looking into distance",
+      "looking over shoulder"
+    ],
+    "gaze_back": [
+      "head straight",
+      "head slightly turned",
+      "looking over shoulder",
+      "chin slightly lowered"
+    ],
+    "action_front": [
+      "hands at sides",
+      "arms crossed",
+      "hands clasped in front",
+      "one hand raised"
+    ],
+    "action_side": [
+      "arms relaxed",
+      "hands behind back",
+      "one hand on hip",
+      "hand adjusting collar"
+    ],
+    "action_back": [
+      "hands behind back",
+      "arms at sides",
+      "one arm raised",
+      "hand adjusting hood"
+    ],
+    "action_dynamic": [
+      "subtle gesture",
+      "turning motion",
+      "hand extended",
+      "light movement"
+    ],
+    "body_language": [
+      "relaxed posture",
+      "confident stance",
+      "calm posture",
+      "focused posture"
+    ],
+    "outfit_detail": [
+      "coat open",
+      "coat closed",
+      "belt visible",
+      "sleeves rolled"
+    ],
+    "lighting_setup": [
+      "soft studio lighting",
+      "dramatic side light",
+      "rim lighting",
+      "even diffuse lighting"
+    ],
+    "background_style": [
+      "clean white background",
+      "neutral gray background",
+      "soft gradient backdrop",
+      "minimal studio backdrop"
+    ]
+  },
+  "reference_slots": [
+    {
+      "kind": "sketch",
+      "label": "Sketch",
+      "prompt": "Create a clean character sketch reference of a single person based on the provided image. Show the full body from head to toe, centered, with a neutral stance and clear silhouette on a plain studio background. Keep face details, age, identity, outfit and hairstyle consistent. No text or watermark.",
+      "note": "base",
+      "required": false,
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "kind": "complex",
+      "label": "Complex",
+      "prompt": "Generate a clean full-body reference of the character shown in the sketch, keeping face details, age, identity, outfit and hairstyle consistent. Show a different pose in an urban environment, full body visible head to toe, subtle shadows, cinematic mood, photorealistic high resolution, detailed image. Avoid cropped or blurry results, deformed anatomy, text or watermarks.",
+      "note": "blend",
+      "required": false,
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "kind": "portrait",
+      "label": "Portrait",
+      "prompt": "Generate a clean portrait of the character shown in the sketch. Head and shoulders, facing the camera with gentle eye contact and a neutral expression. Keep face details, age, identity, outfit and hairstyle consistent. Plain neutral background, subtle shadows, photorealistic high resolution, detailed image. Avoid cropped face, blurry results, deformed anatomy, text or watermarks.",
+      "note": "portrait",
+      "required": true,
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "kind": "full_front",
+      "label": "Full body",
+      "prompt": "Generate a clean full-body front view reference of the character shown in the sketch. The character faces the camera, standing naturally with feet visible and arms relaxed. Keep face details, age, identity, outfit and hairstyle consistent. Plain neutral background, subtle shadows, cinematic mood, photorealistic high resolution, detailed image. Avoid cropped or blurry results, deformed anatomy, text or watermarks.",
+      "note": "front",
+      "required": true,
+      "negative": "side view, back view",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "kind": "full_side",
+      "label": "Full body",
+      "prompt": "Generate a clean full-body side view reference of the character shown in the sketch. The character is in true side profile, one hand raised above the head in greeting, the other behind the back, full body visible head to toe. Keep face details, age, identity, outfit and hairstyle consistent. Subtle shadows, cinematic mood, photorealistic high resolution, detailed image. Avoid cropped or blurry results, deformed anatomy, text or watermarks.",
+      "note": "side",
+      "required": true,
+      "negative": "front view, back view, facing camera",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "kind": "full_back",
+      "label": "Full body",
+      "prompt": "Generate a clean full-body rear view reference of the character shown in the sketch. The character is seen from behind, looking back over the shoulder toward the camera and gesturing to someone behind, full body visible head to toe. Keep face details, age, identity, outfit and hairstyle consistent. Subtle shadows, cinematic mood, photorealistic high resolution, detailed image. Avoid cropped or blurry results, deformed anatomy, text or watermarks.",
+      "note": "back",
+      "required": true,
+      "negative": "front view, facing camera, face visible",
+      "width": 768,
+      "height": 1024
+    }
+  ],
+  "view_specific_prompts": {
+    "portrait": "Generate a clean portrait of the character shown in the sketch. Head and shoulders, facing the camera with gentle eye contact and a neutral expression. Keep face details, age, identity, outfit and hairstyle consistent. Plain neutral background, subtle shadows, photorealistic high resolution, detailed image. Avoid cropped face, blurry results, deformed anatomy, text or watermarks.",
+    "profile": "Generate a clean side profile portrait of the character shown in the sketch. True 90-degree profile, head and shoulders, clear silhouette, neutral expression. Keep face details, age, identity, outfit and hairstyle consistent. Plain neutral background, subtle shadows, photorealistic high resolution, detailed image. Avoid front view, blurry results, deformed anatomy, text or watermarks.",
+    "full_front": "Generate a clean full-body front view reference of the character shown in the sketch. The character faces the camera, standing naturally with feet visible and arms relaxed. Keep face details, age, identity, outfit and hairstyle consistent. Plain neutral background, subtle shadows, cinematic mood, photorealistic high resolution, detailed image. Avoid cropped or blurry results, deformed anatomy, text or watermarks.",
+    "full_side": "Generate a clean full-body side view reference of the character shown in the sketch. The character is in true side profile, one hand raised above the head in greeting, the other behind the back, full body visible head to toe. Keep face details, age, identity, outfit and hairstyle consistent. Subtle shadows, cinematic mood, photorealistic high resolution, detailed image. Avoid cropped or blurry results, deformed anatomy, text or watermarks.",
+    "full_back": "Generate a clean full-body rear view reference of the character shown in the sketch. The character is seen from behind, looking back over the shoulder toward the camera and gesturing to someone behind, full body visible head to toe. Keep face details, age, identity, outfit and hairstyle consistent. Subtle shadows, cinematic mood, photorealistic high resolution, detailed image. Avoid cropped or blurry results, deformed anatomy, text or watermarks.",
+    "pose_walk": "(walking pose:1.5), (mid-stride:1.4), (dynamic:1.3), one leg forward, arms swinging",
+    "pose_arms": "(arms crossed:1.5), (crossed arms:1.4), arms over chest, confident stance",
+    "pose_sit": "(sitting:1.5), (seated:1.4), sitting on chair, legs visible, relaxed position"
+  },
+  "view_specific_negatives": {
+    "portrait": "side view, profile, back view, turned away, full body, cropped face",
+    "profile": "front view, facing camera, back view, looking at camera, frontal",
+    "full_front": "cropped, partial body, sitting, side view, back view, close up",
+    "full_side": "front view, back view, cropped, facing camera",
+    "full_back": "front view, side view, face visible, looking at camera",
+    "pose_walk": "standing still, static, sitting, arms at sides",
+    "pose_arms": "arms at sides, arms down, hands in pockets",
+    "pose_sit": "standing, walking, lying down"
+  }
+}
