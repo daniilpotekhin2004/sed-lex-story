@@ -1,0 +1,114 @@
+import { useState } from "react";
+import { previewScenePrompt, generateSceneImage } from "../api/generation";
+import type { PromptBundle } from "../shared/types";
+
+interface PromptPreviewProps {
+  sceneId: string;
+  onGenerateStart?: (taskId: string) => void;
+}
+
+export default function PromptPreview({ sceneId, onGenerateStart }: PromptPreviewProps) {
+  const [bundle, setBundle] = useState<PromptBundle | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handlePreview() {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await previewScenePrompt(sceneId);
+      setBundle(data);
+    } catch (err: any) {
+      setError(err.message || "Не удалось получить предпросмотр промпта");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGenerate() {
+    try {
+      setGenerating(true);
+      setError(null);
+      const response = await generateSceneImage(sceneId, {
+        use_prompt_engine: true,
+        num_variants: 1,
+      });
+      if (onGenerateStart && response.task_id) {
+        onGenerateStart(response.task_id);
+      }
+    } catch (err: any) {
+      setError(err.message || "Не удалось запустить генерацию");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  return (
+    <div className="border rounded p-4 bg-white">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Предпросмотр промпта</h3>
+        <button
+          onClick={handlePreview}
+          disabled={loading}
+          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm"
+        >
+          {loading ? "Загрузка..." : "Предпросмотр промпта"}
+        </button>
+      </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+
+      {bundle && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Сгенерированный промпт
+            </label>
+            <div className="p-3 bg-gray-50 border rounded text-sm whitespace-pre-wrap">
+              {bundle.prompt}
+            </div>
+          </div>
+
+          {bundle.negative_prompt && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Негативный промпт
+              </label>
+              <div className="p-3 bg-gray-50 border rounded text-sm whitespace-pre-wrap">
+                {bundle.negative_prompt}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Конфигурация
+            </label>
+            <div className="p-3 bg-gray-50 border rounded text-sm">
+              <pre className="text-xs">{JSON.stringify(bundle.config, null, 2)}</pre>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGenerate}
+            disabled={generating}
+            className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+          >
+            {generating ? "Запуск генерации..." : "Сгенерировать изображения"}
+          </button>
+        </div>
+      )}
+
+      {!bundle && !loading && (
+        <div className="text-center text-gray-500 py-8">
+          Нажмите «Предпросмотр промпта», чтобы увидеть результат от PromptEngine
+        </div>
+      )}
+    </div>
+  );
+}
