@@ -1,0 +1,1 @@
+full body character sheet, {__base_setup__}, {__pose_type__}, {__camera_angle__}, {__gaze_direction__}, {__action_detail__}, clean white background, professional character design, consistent lighting

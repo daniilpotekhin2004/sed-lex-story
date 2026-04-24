@@ -1,0 +1,12 @@
+casual clothing
+fantasy outfit
+modern dress
+simple tunic
+elegant attire
+practical armor
+everyday clothes
+formal wear
+adventurer gear
+simple robe
+battle outfit
+ceremonial garb

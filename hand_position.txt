@@ -1,0 +1,1 @@
+Full-body front view of the character, {__pose_type__}, {__gaze_direction__}, {__action_detail__}, {__facial_expression__}, {__body_language__}, {__outfit_detail__}, clean white background, professional character design, consistent lighting, make sure the entire body is visible. Keep the character's appearance perfectly consistent.
