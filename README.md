@@ -1,29 +1,29 @@
-# Пакет оригинальных материалов LexQuest
+# LexQuest Original Content Pack
 
-Этот архив собран как компактный набор исходных материалов для внешней ревизии и подготовки текста о проекте.
+This archive is compiled as a compact set of source materials for external audit and preparation of text about the project.
 
-Внутри оставлены:
-- исходный код прикладочного бэкенда (`backend/app`);
-- исходный код фронтенда (`frontend/src`);
-- миграции БД и тесты;
-- workflow-конфиги и текстовые шаблоны, связанные с генерацией;
-- несколько markdown-документов, которые объясняют продуктовую логику и устройство пайплайна.
+Left inside:
+- source code of the application backend (`backend/app`);
+- frontend source code (`frontend/src`);
+- database migrations and tests;
+- workflow-configuration and text templates related to generation;
+- several markdown documents that explain the product logic and pipeline design.
 
-Специально исключены:
+Specifically excluded:
 - `node_modules`, `.venv`, `dist`, `build`, `__pycache__`, `.pyc`;
-- базы данных, логи, временные файлы, бинарные артефакты;
-- изображения, аудио, архивы, большие `.docx`, резервные копии и служебные дампы;
-- типовая инфраструктурная обвязка, если она не помогает понять сам продукт.
+- databases, logs, temporary files, binary artifacts;
+- images, audio, archives, large `.docx`, backups and service dumps;
+- a typical infrastructure connection, if it does not help to understand the product itself.
 
-Краткая карта содержимого:
-- `backend/app` — FastAPI-бэкенд, доменные модели, сервисы, API-роуты, интеграции с LLM/ComfyUI/TTS.
-- `backend/alembic_migrations` — эволюция схемы данных проекта.
-- `backend/tests` — тесты ключевых сценариев API и сервисного слоя.
-- `frontend/src` — React/TypeScript-интерфейс проекта, редакторы, библиотека мира, плеер, голосовые и генеративные экраны.
-- `tools/workflows` и `tools/comfyui_wildcards` — конфиги и текстовые строительные блоки для генеративных workflow.
-- `docs` и корневые `.md` — пояснения по creative mode, авторингу квестов, pipeline profiles и потоку параметров.
+Brief content map:
+- `backend/app` - FastAPI backend, domain models, services, API routes, integration with LLM/ComfyUI/TTS.
+- `backend/alembic_migrations` - evolution of the project data schema.
+- `backend/tests` - tests of key API and service layer scenarios.
+- `frontend/src` - React/TypeScript interface of the project, editors, world library, player, voice and generative screens.
+- `tools/workflows` and `tools/comfyui_wildcards` - configs and text building blocks for generative workflows.
+- `docs` and root `.md` - explanations on creative mode, quest authoring, pipeline profiles and parameter flow.
 
-Если читать пакет как материал для текста, разумный порядок такой:
+If you read the package as material for text, a reasonable order is:
 1. `docs/CREATIVE_MODE_GUIDE_RU.md`
 2. `docs/QUEST_AUTHORING_GUIDE_RU.md`
 3. `frontend/README.md`
@@ -35,5 +35,5 @@
 9. `GENERATION_FLOW.md`
 10. `WORKFLOWS.md`
 
-Замечание по архиву:
-- В markdown-файлах могут встречаться ссылки на изображения, которые сознательно не приложены, чтобы пакет оставался легким.
+Note on the archive:
+- There may be links to images in markdown files that are deliberately not included to keep the package lightweight.
